@@ -16,8 +16,11 @@ int main() {
 	}
 	*/
 	Board board(10, 10);
-	board.start(20);
 	int row, col;
+	std::cout << board << "\n" << std::endl;
+	std::cin >> row;
+	std::cin >> col;
+	board.start(20, row, col);
 	while (true) {
 		std::cout << board << "\n" << std::endl;
 		std::cin >> row;

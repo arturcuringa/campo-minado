@@ -11,10 +11,13 @@
 
 class Board {
 
-	private:
+	protected:
 		std::size_t rows;
 		std::size_t collumns;
 		std::unique_ptr<Cell[]> board;
+		bool generated;
+		const std::vector<int> y_axis_iterator{ -1, -1, -1,  1, 1, 1,  0, 0 };
+		const std::vector<int> x_axis_iterator{ -1,  0,  1, -1, 0, 1, -1, 1 };
 	public:
 		std::mt19937 generator;
 		std::uniform_int_distribution<int> distr_rows;
@@ -48,10 +51,19 @@ class Board {
 			return board[get_flat(row, col)];
 		}
 
-		std::vector<std::pair<int, int>> generate_bomb_places(int bombs_nb) {
+		std::vector<std::pair<int, int>> generate_bomb_places(int bombs_nb, int row, int col) {
 			if (bombs_nb >= rows * collumns)
 				throw std::runtime_error("Too mutch bombs");
 			std::set<std::pair<int, int>> bombs_positions;
+			std::set<std::pair<int, int>> inital_space_area;
+			auto inital_pos = std::make_pair(row, col);
+
+			inital_space_area.insert(inital_pos);
+			for (auto i = 0; i < 8; i++) {
+				auto y_pos = row + y_axis_iterator[i];
+				auto x_pos = col + x_axis_iterator[i];
+				inital_space_area.insert(std::make_pair(y_pos, x_pos));
+			}
 				
 			for (auto bomb = 0; bomb < bombs_nb; bomb++) {
 				std::pair<int, int> position;
@@ -59,7 +71,7 @@ class Board {
 					auto _row = distr_rows(generator);
 					auto _col = distr_cols(generator);
 					position = std::make_pair(_row, _col);
-				} while (bombs_positions.find(position) != bombs_positions.end());
+				} while (bombs_positions.find(position) != bombs_positions.end() || inital_space_area.find(position) != inital_space_area.end());
 
 				bombs_positions.insert(position);			
 			}
@@ -86,12 +98,11 @@ class Board {
 		}
 
 		void add_nearby_count(int row, int col) {
-			int y[] = { -1, -1, -1,  1, 1, 1,  0, 0};
-			int x[] = { -1,  0,  1, -1, 0, 1, -1, 1};
+
 
 			for (auto i = 0; i < 8; i++) {
-				auto y_pos = row + y[i];
-				auto x_pos = col + x[i];
+				auto y_pos = row + y_axis_iterator[i];
+				auto x_pos = col + x_axis_iterator[i];
 				if (in_board(y_pos, x_pos)) {
 					Cell& cell = at(y_pos, x_pos);
 					if (cell.get_state() == State::EMPTY)
@@ -103,8 +114,6 @@ class Board {
 		}
 
 		void reveal_bfs(int row, int col) {
-			int y[] = { -1, -1, -1,  1, 1, 1,  0, 0 };
-			int x[] = { -1,  0,  1, -1, 0, 1, -1, 1 };
 			std::queue<std::pair<int,int>> q;
 			q.push(std::make_pair(row, col));
 			while (!q.empty()) {
@@ -113,7 +122,7 @@ class Board {
 				cell.set_revealed(true);
 				q.pop();
 				for (auto i = 0; i < 8; i++) {
-					auto new_pos = std::make_pair(pos.first + y[i], pos.second + x[i]);
+					auto new_pos = std::make_pair(pos.first + y_axis_iterator[i], pos.second + x_axis_iterator[i]);
 					if (in_board(new_pos.first, new_pos.second)) {
 						auto& tmp_cell = at(new_pos.first, new_pos.second);
 						if (!tmp_cell.get_revealed()) {
@@ -146,12 +155,31 @@ class Board {
 			return true;
 		}
 
-		void start(int bombs_nb) {
-			auto bombs = generate_bomb_places(bombs_nb);
-			for (auto bomb : bombs) {
-				Cell& cell = at(bomb.first, bomb.second);
-				cell.set_state(State::BOMB);
-				add_nearby_count(bomb.first, bomb.second);
+		void unreveal() {
+			for (auto row = 0; row < rows; row++) {
+				for (auto col = 0; col < col; col++) {
+					Cell& cell = at(row, col);
+					cell.set_revealed(false);
+					cell.set_flag(false);
+				}
+			}
+		}
+
+		void start(int bombs_nb, int row, int col) {
+			if (!generated) {
+				auto bombs = generate_bomb_places(bombs_nb, row, col);
+				for (auto bomb : bombs) {
+					Cell& cell = at(bomb.first, bomb.second);
+					cell.set_state(State::BOMB);
+					add_nearby_count(bomb.first, bomb.second);
+				}
+				play_pos(row, col);
+
+			}
+			else {
+				unreveal();
+				play_pos(row, col);
+
 			}
 		}
 
@@ -168,7 +196,7 @@ class Board {
 							os << cell.bombs_near;
 
 					}else
-						os << '_';
+						os << '?';
 					if (col != _board.collumns - 1)
 						os << " ";
 				}
