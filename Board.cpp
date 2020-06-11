@@ -171,7 +171,6 @@ void Board::reveal_all() {
 void Board::start(int bombs_nb, int row, int col) {
 	this->bombs_nb = bombs_nb;
 	this->flags_nb = bombs_nb;
-	//std::cout
 	if (!generated) {
 		generate_bomb_places(bombs_nb, row, col);
 		for (auto bomb : this->bombs) {

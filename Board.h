@@ -26,7 +26,6 @@ class Board {
 		std::mt19937 generator;
 		std::uniform_int_distribution<int> distr_rows;
 		std::uniform_int_distribution<int> distr_cols;
-
 		Board(std::size_t _rows, std::size_t _collumns);
 		// Instead of create a friend class, use at to access the cell
 		Cell& at(std::size_t row, std::size_t col);

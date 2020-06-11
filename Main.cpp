@@ -1,20 +1,12 @@
-//#include <SFML/Graphics.hpp>
+
 #include "Board.h"
 #include<iostream>
+#include "GameManager.h"
 
 int main() { 
+	GameManager gm;
+	gm.run();
 	/*
-	sf::RenderWindow window(sf::VideoMode(800, 600), "Title");
-	sf::Event event;
-
-	while (window.isOpen()){
-		while (window.pollEvent(event)) {
-			if (event.type == sf::Event::Closed) {
-				window.close();
-			}
-		}
-	}
-	*/
 	Board board(10, 10);
 	int row, col, op;
 	std::cout << board << "\n" << std::endl;
@@ -57,4 +49,5 @@ int main() {
 	std::cin.get();
 	std::cin.get();
 	return 0;
+	*/
 }
