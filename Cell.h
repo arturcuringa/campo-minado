@@ -1,4 +1,5 @@
 #pragma once
+//\brief Estados possíveis de uma célula
 enum class State { BOMB, EMPTY, NEAR };
 
 class Cell {
@@ -8,6 +9,7 @@ class Cell {
 		bool get_flag();
 		State get_state();
 		bool get_revealed();
+		//Conta o número de bombas ao redor 
 		int get_bombs_near();
 		void set_flag(bool _flag);
 		void set_state(State _state);

@@ -27,7 +27,7 @@ Cell& Board::at(std::size_t row, std::size_t col) {
 void Board::generate_bomb_places(int bombs_nb, int row, int col) {
 	if (bombs_nb >= rows * collumns)
 		throw std::runtime_error("Too mutch bombs");
-	std::cout << row << " " << col<< std::endl;
+	//Sets para garantir que duas posições não serão repetidas e verificação em O(log n) se o objeto pertence ao local
 	std::set<std::pair<int, int>> bombs_positions;
 	std::set<std::pair<int, int>> inital_space_area;
 	auto inital_pos = std::make_pair(row, col);
@@ -38,7 +38,7 @@ void Board::generate_bomb_places(int bombs_nb, int row, int col) {
 		auto x_pos = col + x_axis_iterator[i];
 		inital_space_area.insert(std::make_pair(y_pos, x_pos));
 	}
-
+	// Gere posições para as bombas e continua procurando por posições livres
 	for (auto bomb = 0; bomb < bombs_nb; bomb++) {
 		std::pair<int, int> position;
 		do {
@@ -151,13 +151,15 @@ void Board::place_flag(int row, int col) {
 bool Board::check_victory() {
 	if (revealed == rows * collumns - bombs_nb)
 		return true;
-
-	for (auto pos : bombs) {
-		auto& cell = at(pos.first, pos.second);
-		if (!cell.get_flag())
-			return false;
+	if (generated) {
+		for (auto pos : bombs) {
+			auto& cell = at(pos.first, pos.second);
+			if (!cell.get_flag())
+				return false;
+		}
+		return true;
 	}
-	return true;
+	return false;
 }
 
 void Board::unreveal() {
