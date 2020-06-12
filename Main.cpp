@@ -1,10 +1,12 @@
-
 #include "Board.h"
 #include<iostream>
 #include "GameManager.h"
+#include <SFML/Graphics.hpp>
 
 int main() { 
-	GameManager gm;
+
+	sf::RenderWindow window(sf::VideoMode(800, 800), "MineSweeper", sf::Style::Titlebar | sf::Style::Close);
+	GameManager gm(window);
 	gm.run();
 	/*
 	Board board(10, 10);

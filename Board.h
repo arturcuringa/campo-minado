@@ -17,16 +17,17 @@ class Board {
 		std::unique_ptr<Cell[]> board;
 		std::vector<std::pair<int, int>> bombs;
 		bool generated;
-		int revealed = 0;
-		int bombs_nb = 0;
-		int flags_nb = 0;
+		int revealed;
+		int bombs_nb;
+		int flags_nb;
 		const std::vector<int> y_axis_iterator{ -1, -1, -1,  1, 1, 1,  0, 0 };
 		const std::vector<int> x_axis_iterator{ -1,  0,  1, -1, 0, 1, -1, 1 };
 	public:
 		std::mt19937 generator;
 		std::uniform_int_distribution<int> distr_rows;
 		std::uniform_int_distribution<int> distr_cols;
-		Board(std::size_t _rows, std::size_t _collumns);
+		Board(std::size_t _rows, std::size_t _collumns, int _bombs_nb);
+		Board() {}
 		// Instead of create a friend class, use at to access the cell
 		Cell& at(std::size_t row, std::size_t col);
 		void clear();
@@ -36,8 +37,13 @@ class Board {
 		bool check_victory();
 		void unreveal();
 		void reveal_all();
-		void start(int bombs_nb, int row, int col);
+		void start(int row, int col);
 		friend std::ostream& operator<<(std::ostream& os, const Board& _board);
+		std::size_t get_rows_number();
+		std::size_t get_collumns_number();
+		bool is_generated();
+		int get_bombs_number();
+		int get_flag_number();
 
 	private:
 		int get_flat(int i, int j) const;

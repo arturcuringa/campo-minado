@@ -9,7 +9,7 @@ State Cell::get_state() {
 }
 
 bool Cell::get_revealed() {
-	return revel;
+	return reveal;
 }
 
 int Cell::get_bombs_near() {
@@ -25,5 +25,5 @@ void Cell::set_state(State _state) {
 }
 
 void Cell::set_revealed(bool _revel) {
-	revel = _revel;
+	reveal = _revel;
 }

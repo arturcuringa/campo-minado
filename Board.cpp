@@ -1,6 +1,6 @@
 #include "Board.h"
 
-Board::Board(std::size_t _rows, std::size_t _collumns) : rows(_rows), collumns(_collumns) {
+Board::Board(std::size_t _rows, std::size_t _collumns, int _bombs_nb) : rows(_rows), collumns(_collumns), bombs_nb(_bombs_nb), flags_nb(_bombs_nb) {
 	board = std::make_unique<Cell[]>(rows * collumns);
 	for (auto i = 0; i < rows * collumns; i++) {
 		board[i] = Cell();
@@ -11,13 +11,13 @@ Board::Board(std::size_t _rows, std::size_t _collumns) : rows(_rows), collumns(_
 }
 
 int Board::get_flat(int i, int j) const {
-		if (i < 0 || i >= rows) {
-			throw std::out_of_range("Row index out of range");
-		}
-		if (j < 0 || j >= collumns) {
-			throw std::out_of_range("Coulumn index out of range");
-		}
-		return i * collumns + j;
+	if (i < 0 || i >= rows) {
+		throw std::out_of_range("Row index out of range");
+	}
+	if (j < 0 || j >= collumns) {
+		throw std::out_of_range("Coulumn index out of range");
+	}
+	return i * collumns + j;
 }
 
 Cell& Board::at(std::size_t row, std::size_t col) {
@@ -27,6 +27,7 @@ Cell& Board::at(std::size_t row, std::size_t col) {
 void Board::generate_bomb_places(int bombs_nb, int row, int col) {
 	if (bombs_nb >= rows * collumns)
 		throw std::runtime_error("Too mutch bombs");
+	std::cout << row << " " << col<< std::endl;
 	std::set<std::pair<int, int>> bombs_positions;
 	std::set<std::pair<int, int>> inital_space_area;
 	auto inital_pos = std::make_pair(row, col);
@@ -54,14 +55,18 @@ void Board::generate_bomb_places(int bombs_nb, int row, int col) {
 void Board::clear() {
 	revealed = 0;
 	for (auto row = 0; row < rows; row++) {
-		for (auto col = 0; col < col; col++) {
+		for (auto col = 0; col < collumns; col++) {
 			Cell& cell = this->at(row, col);
 			cell.set_state(State::EMPTY);
 			cell.set_flag(false);
 			cell.set_revealed(false);
 			cell.bombs_near = 0;
+
 		}
 	}
+	bombs.clear();
+	flags_nb = bombs_nb;
+	generated = false;
 }
 
 bool Board::in_board(int row, int col) {
@@ -111,6 +116,8 @@ void Board::reveal_bfs(int row, int col) {
 bool Board::play_pos(int row, int col) {
 	if (in_board(row, col)) {
 		auto& cell = at(row, col);
+		if (cell.get_flag())
+			return true;
 		if (cell.get_state() == State::EMPTY) {
 			reveal_bfs(row, col);
 		}
@@ -125,8 +132,6 @@ bool Board::play_pos(int row, int col) {
 			return false;
 		}
 	}
-	std::cout << "Bombs: " << bombs_nb << std::endl;
-	std::cout << "Revealed: " << revealed << std::endl;
 	return true;
 }
 
@@ -134,7 +139,13 @@ bool Board::play_pos(int row, int col) {
 void Board::place_flag(int row, int col) {
 	auto& cell = at(row, col);
 	bool flag_stats = cell.get_flag();
-	cell.set_flag(!flag_stats);
+	if (flag_stats) {
+		flags_nb++;
+		cell.set_flag(!flag_stats);
+	}else if (flags_nb > 0){
+		flags_nb--;
+		cell.set_flag(!flag_stats);
+	}
 }
 
 bool Board::check_victory() {
@@ -160,15 +171,16 @@ void Board::unreveal() {
 }
 
 void Board::reveal_all() {
+	std::cout << "Reveal all" << std::endl;
 	for (auto row = 0; row < rows; row++) {
-		for (auto col = 0; col < col; col++) {
-			Cell& cell = at(row, col);
-			cell.set_revealed(false);
+		for (auto col = 0; col < collumns; col++) {
+			Cell& cell = this->at(row, col);
+			cell.set_revealed(true);
 		}
 	}
 }
 
-void Board::start(int bombs_nb, int row, int col) {
+void Board::start(int row, int col) {
 	this->bombs_nb = bombs_nb;
 	this->flags_nb = bombs_nb;
 	if (!generated) {
@@ -179,7 +191,7 @@ void Board::start(int bombs_nb, int row, int col) {
 			add_nearby_count(bomb.first, bomb.second);
 		}
 		play_pos(row, col);
-
+		generated = true;
 	}
 	else {
 		unreveal();
@@ -213,4 +225,24 @@ std::ostream& operator<<(std::ostream& os, const Board& _board) {
 			os << "\n";
 	}
 	return os;
+}
+
+std::size_t Board::get_rows_number() {
+	return rows;
+}
+
+std::size_t Board::get_collumns_number() {
+	return collumns;
+}
+
+bool Board::is_generated() {
+	return generated;
+}
+
+int Board::get_bombs_number() {
+	return bombs_nb;
+}
+
+int Board::get_flag_number() {
+	return flags_nb;
 }
