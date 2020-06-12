@@ -7,7 +7,7 @@ Implementação simples de um campo minado, utilizando SFML para interface gráf
 
 [x]Botão esquerdo para adicionar/remover bandeiras
 
-[ ]Power-up de espiar, permitindo que o jogador escolha uma célula e revele se há uma bomba ou não, sem perdas.
+[ ]Power-up de espiar, permite que o jogador escolha uma célula e revele se há uma bomba ou não, sem danos.
 
 
 ### Interface Gráfica:
